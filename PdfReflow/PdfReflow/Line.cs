@@ -15,18 +15,65 @@ namespace PdfReflow
         /// </summary>
         public List<Word> Words;
 
-        public Line(List<Word> lineWords)
+        public Line()
         {
-            this.Words = lineWords;
-            this.XMin = lineWords.Min(w => w.XMin);
-            this.XMax = lineWords.Max(w => w.XMax);
-            this.YMin = lineWords.Min(w => w.YMin);
-            this.YMax = lineWords.Min(w => w.YMax);
+            Words = new List<Word>();
+        }
+
+        public void AddWord(Word w)
+        {
+            if (Words.Count == 0)
+            {
+                XMin = w.XMin;
+                XMax = w.XMax;
+                YMin = w.YMin;
+                YMax = w.YMax;
+            }
+            else
+            {
+                XMin = Math.Min(XMin, w.XMin);
+                XMax = Math.Max(XMax, w.XMax);
+                YMin = Math.Min(YMin, w.YMin);
+                YMax = Math.Max(YMax, w.YMax);
+            }
+            Words.Add(w);
         }
 
         public override string ToString()
         {
-            return string.Join(" ",Words.Select(w => w.ToString()));
+            return string.Join(" ",Words.Select(w => w.Text));
         }
+
+        /// <summary>
+        /// checks if the given word should be added to this line . 
+        /// </summary>
+        /// <param name="nextWord">The word to check </param>
+        /// <returns>true if the word belongs to this line, ie. if based on its position it is likely to be the next word in line</returns>
+        
+        public bool ShouldAdd(Word nextWord)
+        {
+            if(Words.Count() ==0)
+            {
+                return true;
+            }
+
+            ///  Rougly same height on page? 
+            float errorMargin = 0.2f * Height;
+            if (nextWord.YMin > YMin - errorMargin  && nextWord.YMax < YMax + errorMargin)
+            {
+                /// Check if in same column:
+                /// Compare horizontal space to lineheight (we use lineheight as proxy for fontsize)
+                /// Close enough? -> same column -> on same line
+                float hSpace = nextWord.XMin - XMax;
+                if (hSpace > 0 && hSpace < 2 * Height)
+                {
+                    return true;
+                }
+            }
+            return false;
+        
+        }
+
+
     }
 }

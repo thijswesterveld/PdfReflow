@@ -15,25 +15,10 @@ namespace PdfReflow
         /// </summary>
         public string Text;
 
-        /// <summary>
-        /// checks if this word is the next word on the same line as previousWord
-        /// </summary>
-        /// <param name="previousWord"></param>
-        /// <returns>true if this word is the next on the same line, false otherwise</returns>
-        public bool IsNextOnSameLine(Word previousWord)
+       
+        public override string ToString()
         {
-            if(YMin == previousWord.YMin)
-            {   
-                /// Same height on page. Check if in same column:
-                /// Compare horizontal space to lineheight (we use lineheight as proxy for fontsize)
-                /// Close enough? -> same column -> on same line
-                float hSpace = XMin - previousWord.XMax;
-                if (hSpace < 2 * Height)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return Text;
         }
     }
 }

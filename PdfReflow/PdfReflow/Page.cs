@@ -56,6 +56,8 @@ namespace PdfReflow
 
             IdentifyBlocks();
 
+            FixHyphenation();
+
             IdentifyHeaders();
 
             OrderBlocks();
@@ -63,51 +65,63 @@ namespace PdfReflow
 
         private void IdentifyLines()
         {
-            lines = new List<Line>();
-            List<Word> lineWords = new List<Word>();
-            Word previousWord = null;
-            foreach (Word w in words)
-            { 
-                if(previousWord == null || w.IsNextOnSameLine(previousWord))
+            if (words != null)
+            {
+                lines = new List<Line>();
+                Line currentLine = new Line();
+                foreach (Word w in words)
                 {
-                    lineWords.Add(w);
+                    if (currentLine.ShouldAdd(w)) 
+                    {
+                        currentLine.AddWord(w);
+                    }
+                    else
+                    {
+                        lines.Add(currentLine);
+                        currentLine = new Line();
+                        currentLine.AddWord(w);
+                    }
                 }
-                else 
-                {
-                    lines.Add(new Line(lineWords));
-                    lineWords = new List<Word>();
-                    lineWords.Add(w);
-                }
-                previousWord = w;
+                lines.Add(currentLine);
             }
-            words = null;
         }
 
         private void IdentifyBlocks()
         {
-            blocks = new List<TextBlock>();
-            foreach(Line l in lines)
+            if (lines != null)
             {
-                TextBlock thisLineBlock = blocks.Where(b => b.IsNextLine(l)).FirstOrDefault();
-                if (thisLineBlock == null)
+                blocks = new List<TextBlock>();
+                foreach (Line l in lines)
                 {
-                    blocks.Add(new TextBlock(l));
-                }
-                else
-                {
-                    thisLineBlock.AddLine(l);
+                    TextBlock thisLineBlock = blocks.Where(b => b.IsNextLine(l)).FirstOrDefault();
+                    if (thisLineBlock == null)
+                    {
+                        blocks.Add(new TextBlock(l));
+                    }
+                    else
+                    {
+                        thisLineBlock.AddLine(l);
+                    }
                 }
             }
         }
 
+        private void FixHyphenation()
+        {
+         // TODO
+        }
+
         private void IdentifyHeaders()
         {
-            List<TextBlock> newBlocks = new List<TextBlock>();
-            foreach(TextBlock b in blocks)
+            if (blocks != null)
             {
-                newBlocks.AddRange(b.IdentifyHeaders());
+                List<TextBlock> newBlocks = new List<TextBlock>();
+                foreach (TextBlock b in blocks)
+                {
+                    newBlocks.AddRange(b.IdentifyHeaders());
+                }
+                blocks = newBlocks;
             }
-            blocks = newBlocks;
         }
 
         private void OrderBlocks()

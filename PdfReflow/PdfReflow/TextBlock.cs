@@ -52,11 +52,18 @@ namespace PdfReflow
         /// <returns>True if the line belongs to this textblock, false otherwise</returns>
         public bool IsNextLine(Line l)
         {
-            // Same column?
-            if (Math.Abs(XMin - l.XMin) < l.Height)
+            // Vertically close enough?
+            if (l.YMin - YMax < l.Height)
             {
-                // Vertically close enough?
-                if (l.YMin - YMax < l.Height)
+                /// Same column?  -> Check if we have overlap. 
+                /// line starts between block start and end
+                ///  B: |------------------|
+                ///  L:       |----------
+                /// or block starts between line start and end
+                ///  B:       |----------
+                ///  L: |------------------|
+                
+                if ((l.XMin >= XMin && l.XMin <= XMax) || (XMin >= l.XMin && XMin <= l.XMax))
                 {
                     return true;
                 }
@@ -82,19 +89,28 @@ namespace PdfReflow
             TextBlock block = null;
             foreach(Line l in Lines)
             {
-                if(previousLine == null)
+                if (previousLine == null)
                 {
                     block = new TextBlock(l);
                 }
-                if(l.Height < block.AvgLineHeight)
+                else
                 {
-                    // previous line(s) are headers; this is body text
-                    block.Type = ElementType.Header;
-                    yield return block;
-                    block = new TextBlock(l);
-                    block.Type = ElementType.Paragraph;
+                    if (l.Height < 0.9 * block.AvgLineHeight)
+                    {
+                        // previous line(s) are headers; this is body text
+                        block.Type = ElementType.Header;
+                        yield return block;
+                        block = new TextBlock(l);
+                        block.Type = ElementType.Paragraph;
+                    }
+                    else
+                    {
+                        block.AddLine(l);
+                    }
                 }
+                previousLine = l;
             }
+            yield return block;
         }
 
         public override string ToString()
