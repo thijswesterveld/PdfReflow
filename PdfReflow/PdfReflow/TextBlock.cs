@@ -124,13 +124,37 @@ namespace PdfReflow
                 }
                 result.AppendLine(l.ToString());
             }
-            if (Type != ElementType.Header)
-            {
-                result.AppendLine();
-                result.AppendLine();
-            }
+           result.AppendLine();
             return result.ToString();
         }
 
+        /// <summary>
+        /// Remove hyphenation. Terms that are split over multi-
+        /// ple lines in same textblock are combined (e.g., multi-ple -> multiple).
+        /// </summary>
+        public void Dehyphenate()
+        {
+            Line previousLine = null;
+            foreach (Line line in Lines)
+            {
+                if (previousLine != null)
+                {
+                    var lastWordInPreviousLine = previousLine.Words.LastOrDefault();
+                    if (lastWordInPreviousLine != null && lastWordInPreviousLine.Text.EndsWith("-"))
+                    {
+                        var firstWordInLine = line.Words.FirstOrDefault();
+                        /// Keep hyphens in special cases
+                        /// 1. In combinations with "en": peper- en zoutstelletje
+                        /// 2. When next word is capitalised: Amsterdam-Rijnkanaal
+                        if(firstWordInLine != null && !String.IsNullOrEmpty(firstWordInLine.Text) && firstWordInLine.Text.ToLower() != "en" && Char.IsLower(firstWordInLine.Text[0]))
+                        {
+                            lastWordInPreviousLine.Text = lastWordInPreviousLine.Text.Substring(0,lastWordInPreviousLine.Text.Length-1) + firstWordInLine.Text;
+                            line.Words.Remove(firstWordInLine);
+                        }
+                    }
+                }
+                previousLine = line;
+            }
+        }
     }
 }

@@ -47,7 +47,7 @@ namespace PdfReflow
                     w.YMax = float.Parse(word.Attribute("yMax").Value);
                     if (w.YMax > pageHeight - ignoreBorder || w.XMax > pageWidth - ignoreBorder || w.YMin < ignoreBorder || w.XMin < ignoreBorder)
                     {
-                        Console.WriteLine("Skip word: {0}", w.Text);
+                        //Console.WriteLine("Skip word: {0}", w.Text);
                     }
                     else
                     {

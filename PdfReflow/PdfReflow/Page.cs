@@ -108,7 +108,10 @@ namespace PdfReflow
 
         private void FixHyphenation()
         {
-         // TODO
+            foreach (TextBlock block in blocks)
+            {
+                block.Dehyphenate();
+            }
         }
 
         private void IdentifyHeaders()
