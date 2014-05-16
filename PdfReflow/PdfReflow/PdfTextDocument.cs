@@ -17,6 +17,10 @@ namespace PdfReflow
             Pages = new List<Page>();
         }
 
+        /// <summary>
+        /// Read HTML file with pages, words and bounding boxes into pdftextdocument format
+        /// </summary>
+        /// <param name="filePath">Path to HTML file which is output of `pdftotext -raw -bbox somefile.pdf`</param>
         public void FromXHtml(string filePath)
         {
             var doc = XElement.Load(filePath);
@@ -38,9 +42,15 @@ namespace PdfReflow
                 p.PageNumber = ++pageNumber;
                 foreach (var word in page.XPathSelectElements("./xhtml:word", namespaceManager))
                 {
-
                     Word w = new Word();
+                    int idx = word.Value.IndexOf((char)8226);
+                    if(idx >= 0)
+                    {
+                        // replace bullet '•' with '-'
+                        word.Value=word.Value.Replace((char)8226,'-');
+                    }
                     w.Text = word.Value;
+                    
                     w.XMin = float.Parse(word.Attribute("xMin").Value);
                     w.XMax = float.Parse(word.Attribute("xMax").Value);
                     w.YMin = float.Parse(word.Attribute("yMin").Value);
@@ -62,7 +72,7 @@ namespace PdfReflow
         {
             foreach(Page p in Pages)
             {
-                p.Reflow();
+                    p.Reflow();
             }
         }
 
@@ -81,6 +91,10 @@ namespace PdfReflow
             foreach(Page p in Pages)
             {
                 string file = Path.Combine(basePath,string.Format("{0}_p{1:000}.txt",title,p.PageNumber));
+                if(!System.IO.Directory.Exists(basePath))
+                {
+                    System.IO.Directory.CreateDirectory(basePath);
+                }
                 TextWriter tw = new StreamWriter(file);
                 tw.Write(p.ToString());
                 tw.Flush();

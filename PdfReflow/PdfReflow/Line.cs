@@ -49,29 +49,41 @@ namespace PdfReflow
         /// </summary>
         /// <param name="nextWord">The word to check </param>
         /// <returns>true if the word belongs to this line, ie. if based on its position it is likely to be the next word in line</returns>
-        
+
         public bool ShouldAdd(Word nextWord)
         {
-            if(Words.Count() ==0)
+            if (Words.Count() == 0)
             {
                 return true;
             }
 
-            ///  Rougly same height on page? 
-            float errorMargin = 0.2f * Height;
-            if (nextWord.YMin > YMin - errorMargin  && nextWord.YMax < YMax + errorMargin)
+            /// Check if in same column:
+            /// Compare horizontal space to lineheight (we use lineheight as proxy for fontsize)
+            /// Close enough? -> same column -> check same line
+            float hSpace = nextWord.XMin - XMax;
+            if (hSpace > 0 && hSpace < 2 * Height)
             {
-                /// Check if in same column:
-                /// Compare horizontal space to lineheight (we use lineheight as proxy for fontsize)
-                /// Close enough? -> same column -> on same line
-                float hSpace = nextWord.XMin - XMax;
-                if (hSpace > 0 && hSpace < 2 * Height)
+                ///  Rougly same height on page? 
+                float errorMargin = 0.2f * Height;
+                if (nextWord.YMin > YMin - errorMargin && nextWord.YMax < YMax + errorMargin)
+                {
+                    return true;
+                }
+                // Be a bit more lenient to deal with text on an angle
+                errorMargin =  Math.Min(Height,nextWord.Height);
+                if (nextWord.YMin > YMin - errorMargin && nextWord.YMax < YMax + errorMargin)
                 {
                     return true;
                 }
             }
+            //if (hSpace < 0 && hSpace)
+            //{
+            //    /// This may be a line on an angle
+            //    /// Try to find the angle and check if it is 'flat' enough
+            //    ///hSpace > -0.5 * Height)
+            //}
             return false;
-        
+
         }
 
 
