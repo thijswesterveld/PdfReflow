@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfReflow", "PdfReflow\PdfReflow.csproj", "{C6578EAE-2AD7-49FB-B891-D80CA3DAE56C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTest", "UnitTest\IntegrationTest.csproj", "{FA0566F6-D17D-4053-9F15-C810C9DC9750}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C6578EAE-2AD7-49FB-B891-D80CA3DAE56C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6578EAE-2AD7-49FB-B891-D80CA3DAE56C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6578EAE-2AD7-49FB-B891-D80CA3DAE56C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA0566F6-D17D-4053-9F15-C810C9DC9750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA0566F6-D17D-4053-9F15-C810C9DC9750}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA0566F6-D17D-4053-9F15-C810C9DC9750}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA0566F6-D17D-4053-9F15-C810C9DC9750}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

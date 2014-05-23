@@ -17,7 +17,7 @@ namespace PdfReflow
                 Console.WriteLine(file);
                 string baseName = System.IO.Path.GetFileNameWithoutExtension(file);
                 PdfTextDocument doc = new PdfTextDocument();
-                doc.FromXHtml(file);
+                doc.FromXHtmlFile(file);
                 doc.Reflow();
                 doc.Export(System.IO.Path.Combine(outputDir,baseName), baseName);
             }

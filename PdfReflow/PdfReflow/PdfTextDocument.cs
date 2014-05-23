@@ -21,26 +21,40 @@ namespace PdfReflow
         /// Read HTML file with pages, words and bounding boxes into pdftextdocument format
         /// </summary>
         /// <param name="filePath">Path to HTML file which is output of `pdftotext -enc Latin1 -raw -bbox somefile.pdf`</param>
-        public void FromXHtml(string filePath)
+        public void FromXHtmlFile(string filePath, int pageNumber = -1)
         {
             TextReader tr = new StreamReader(filePath, Encoding.GetEncoding("ISO-8859-1"));
-            var doc = XElement.Load(tr);
-            
+            FromXHtmlString(tr.ReadToEnd(), pageNumber);
+        }
+
+        public void FromXHtmlString(string text, int pageNumber = -1)
+        {
+            var doc = XElement.Parse(text);
+
             // Create a namespace manager
             XmlNamespaceManager namespaceManager = new XmlNamespaceManager(new NameTable());
             
             // Define your default namespace including a prefix to be used later in the XPath expression
             namespaceManager.AddNamespace("xhtml","http://www.w3.org/1999/xhtml");
             
-            int pageNumber = 0;
-            Title = doc.XPathSelectElement("//xhtml:title", namespaceManager).Value;
-            foreach (var page in doc.XPathSelectElements("//xhtml:page", namespaceManager))
+            int pageSequence = 0;
+            var title = doc.XPathSelectElement("//xhtml:title", namespaceManager);
+            if(title != null)
+            {
+                this.Title = title.Value;
+            }
+            var pages = doc.XPathSelectElements("//xhtml:page", namespaceManager);
+            if(pageNumber >0)
+            {
+                pages = pages.Where((p,i) => i == pageNumber-1);
+            }
+            foreach (var page in pages)
             {
                 float pageWidth = float.Parse(page.Attribute("width").Value);
                 float pageHeight = float.Parse(page.Attribute("height").Value);
                 int ignoreBorder = 10; /// number of pts on edges of page to ignore
                 Page p = new Page();
-                p.PageNumber = ++pageNumber;
+                p.PageNumber = ++pageSequence;
                 foreach (var word in page.XPathSelectElements("./xhtml:word", namespaceManager))
                 {
                     Word w = new Word();
@@ -97,7 +111,7 @@ namespace PdfReflow
                 {
                     System.IO.Directory.CreateDirectory(basePath);
                 }
-                TextWriter tw = new StreamWriter(file);
+                TextWriter tw = new StreamWriter(file, false, Encoding.UTF8);
                 tw.Write(p.ToString());
                 tw.Flush();
                 tw.Close();
