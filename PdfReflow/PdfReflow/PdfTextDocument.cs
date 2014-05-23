@@ -46,6 +46,7 @@ namespace PdfReflow
             var pages = doc.XPathSelectElements("//xhtml:page", namespaceManager);
             if(pageNumber >0)
             {
+                pageSequence = pageNumber - 1;
                 pages = pages.Where((p,i) => i == pageNumber-1);
             }
             foreach (var page in pages)
