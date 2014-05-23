@@ -18,13 +18,13 @@ namespace PdfReflow
         {
             get
             {
-                if (Children == null || Children.Count == 0)
+                if (Children == null || Children.Count(c => c is Line) == 0)
                 {
                     return 0;
                 }
                 else
                 {
-                    return totalLineHeight / Children.Where(c => c is Line).Count();
+                    return totalLineHeight / Children.Count(c => c is Line);
                 }
             }
         }
@@ -109,8 +109,7 @@ namespace PdfReflow
 
         public void IdentifyHeaders()
         {
-            List<BoundingBox> newChildren = new List<BoundingBox>();
-            
+            List<BoundingBox> newChildren = new List<BoundingBox>();   
             Line previousLine = null;
             TextBlock block = null;
 
@@ -125,18 +124,11 @@ namespace PdfReflow
                     }
                     else
                     {
-                        if (l.Height < 0.95 * block.AvgLineHeight)
-                        {
-                            // previous line(s) are headers; this is body text
-                            block.Type = ElementType.Header;
-                            newChildren.Add(block);
-                            block = new TextBlock(l);
-                            block.Type = ElementType.Paragraph;
-                        }
-                        else if (l.Height > 1.1 * block.AvgLineHeight)
+                        if ((int)l.Height != (int)previousLine.Height)
                         {
                             // Font size difference This is a block
                             newChildren.Add(block);
+
                             block = new TextBlock(l);
                             block.Type = ElementType.Paragraph;
                         }
@@ -159,6 +151,34 @@ namespace PdfReflow
             {
                 newChildren.Add(block);
             }
+            TextBlock previousBlock = null;
+            foreach(TextBlock newBlock in newChildren.Select(c => c as TextBlock))
+            {
+                // check if previous block could be a header block
+                if(previousBlock != null)
+                {
+                    // headers have no more than 3 lines
+                    if(previousBlock.Children.Count(c => c is Line) <= 3)
+                    {
+                        // headers have fewer lines than the corresponding body text
+                        if (newBlock.Children.Count(c => c is Line) > previousBlock.Children.Count(c => c is Line))
+                        {
+                            previousBlock.Type = ElementType.H3;
+                        }
+
+                    }
+                }
+                if (newBlock.AvgLineHeight > 50)
+                {
+                    newBlock.Type = ElementType.H1;
+                }
+                else if (newBlock.AvgLineHeight > 20)
+                {
+                    newBlock.Type = ElementType.H2;
+                }
+                previousBlock = newBlock;
+
+            }
             Children = newChildren;
         }
 
@@ -175,9 +195,17 @@ namespace PdfReflow
                 if (childBox is Line)
                 {
                     Line l = childBox as Line;
-                    if (Type == ElementType.Header)
+                    if (Type == ElementType.H1)
                     {
                         result.Append("#");
+                    }
+                    if (Type == ElementType.H2)
+                    {
+                        result.Append("##");
+                    }
+                    if (Type == ElementType.H3)
+                    {
+                        result.Append("###");
                     }
                     result.AppendLine(l.ToString());
                 }

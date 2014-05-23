@@ -33,12 +33,12 @@ namespace IntegrationTest
                     int page = int.Parse(pageString);
                     PdfTextDocument d = new PdfTextDocument();
                     d.FromXHtmlFile(html, page);
-                    TestExtraction(expected, d.Pages[0]);
+                    TestExtraction(expected, d.Pages[0], txt);
                 }
             }
         }
         
-        private void TestExtraction(string expected, Page page)
+        private void TestExtraction(string expected, Page page, string fileName)
         {
             string actual = GetText(page);
             var actualTerms = actual.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
@@ -46,7 +46,7 @@ namespace IntegrationTest
             Assert.AreEqual(expectedTerms.Length, actualTerms.Length);
             for (int i = 0; i < expectedTerms.Length; ++i)
             {
-                Assert.AreEqual(expectedTerms[i], actualTerms[i]);
+                Assert.AreEqual(expectedTerms[i], actualTerms[i],fileName);
             }
         }
 

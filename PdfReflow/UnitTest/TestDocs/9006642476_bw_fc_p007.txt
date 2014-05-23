@@ -1,10 +1,11 @@
-#Kan jouw school
-#eigenlijk overstromen?
+﻿###Kan jouw school
+###eigenlijk overstromen?
 
 Dat gaan we in dit
 hoofdstuk uitzoeken!
 Elke les gaat over een
 vraag.
+
 ·Les 1: Hoe kan Nederland
 
 overstromen?
@@ -19,7 +20,7 @@ en laag is?
 Nederland beschermd
 tegen het water?
 
-·· Werkschrift blz. 3 opdracht 1
+##·· Werkschrift blz. 3 opdracht 1
 
 Voor ons werk staan wij
 vaak in het water. Wij
@@ -32,9 +33,9 @@ geen natte voeten!
 
 7
 
-3
+##3
 
 Nederland in 2075?
 
-4
+##4
 

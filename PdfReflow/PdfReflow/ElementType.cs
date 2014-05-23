@@ -10,6 +10,8 @@ namespace PdfReflow
         Unknown,
         Paragraph,
         Caption,
-        Header,
+        H1,
+        H2,
+        H3,
     }
 }

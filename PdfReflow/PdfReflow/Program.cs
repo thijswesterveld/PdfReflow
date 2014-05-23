@@ -12,7 +12,7 @@ namespace PdfReflow
         {
             string inputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\bboxhtml\";
             string outputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\txt_mergereorder\";
-            foreach (string file in System.IO.Directory.EnumerateFiles(inputDir, "*.html"))
+            foreach (string file in System.IO.Directory.EnumerateFiles(inputDir, "9006643329_bw_fc*.html"))
             {
                 Console.WriteLine(file);
                 string baseName = System.IO.Path.GetFileNameWithoutExtension(file);
