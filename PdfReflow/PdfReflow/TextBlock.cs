@@ -234,7 +234,7 @@ namespace PdfReflow
         public void OrderChildren()
         {
             List<BoundingBox> orderedChildren = new List<BoundingBox>();
-            foreach (BoundingBox child in Children.OrderBy(c => c.YMin).ThenBy(c => c.XMin))
+            foreach (BoundingBox child in Children.OrderBy(c => (int)(c.YMin/20)).ThenBy(c => (int)(c.XMin/20)))
             {
                 TextBlock block = child as TextBlock;
                 if (block != null)
