@@ -190,30 +190,32 @@ namespace PdfReflow
                 if (childBox is TextBlock)
                 {
                     TextBlock block = childBox as TextBlock;
+                    if (block.Type == ElementType.H1)
+                    {
+                        result.Append("#");
+                    }
+                    if (block.Type == ElementType.H2)
+                    {
+                        result.Append("##");
+                    }
+                    if (block.Type == ElementType.H3)
+                    {
+                        result.Append("###");
+                    }
                     result.Append(block.ToString());
                 }
                 if (childBox is Line)
                 {
                     Line l = childBox as Line;
-                    if (Type == ElementType.H1)
-                    {
-                        result.Append("#");
-                    }
-                    if (Type == ElementType.H2)
-                    {
-                        result.Append("##");
-                    }
-                    if (Type == ElementType.H3)
-                    {
-                        result.Append("###");
-                    }
-                    result.AppendLine(l.ToString());
+                    result.Append(l.ToString());
+                    result.Append(" ");
                 }
             }
 
             // Add empty line at the end of the textblock, but only if the box contains text (to avoid many empty lines on nested blocks)
             if (Children.Where(c => c is Line).Count() > 0)
             {
+                result.AppendLine();
                 result.AppendLine();
             }
             return result.ToString();
