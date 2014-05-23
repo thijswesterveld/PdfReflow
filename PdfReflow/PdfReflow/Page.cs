@@ -52,6 +52,8 @@ namespace PdfReflow
 
         public void Reflow()
         {
+            IdentifyPageOrientation();
+
             RegroupSplitWords();
 
             IdentifyLines();
@@ -65,6 +67,70 @@ namespace PdfReflow
             OrderBlocks();
 
             IdentifyHeaders();
+        }
+
+        private void IdentifyPageOrientation()
+        {
+            if (words != null)
+            {
+                Word previousWord = null;
+                List<float> verticalOffsets = new List<float>();
+                foreach (Word w in words)
+                {
+                    if (previousWord != null)
+                    {
+                        verticalOffsets.Add((w.YMin - previousWord.YMin) / Math.Max(w.Height, previousWord.Height));
+                    }
+                    previousWord = w;
+                }
+                var increasingOffsets = verticalOffsets.Where(o => o > 0.5);
+                var decreasingOffsets = verticalOffsets.Where(o => o < -0.5);
+                var sameLevelOffsets = verticalOffsets.Where(o => o <= 0.5 && o >= -0.5);
+                if (2 * increasingOffsets.Count() < decreasingOffsets.Count() && sameLevelOffsets.Count() > decreasingOffsets.Count())
+                {
+                    var incAvg = 0.0;
+                    var decAvg = 0.0;
+                    if (increasingOffsets.Count() > 0)
+                    {
+                        incAvg = Math.Abs(increasingOffsets.Average());
+                    }
+                    if (decreasingOffsets.Count() > 0)
+                    {
+                        decAvg = Math.Abs(decreasingOffsets.Average());
+                    }
+                    if (decAvg >= 1.0)
+                    {
+                        if (decreasingOffsets.Count() > 10)
+                        {
+                            // Page is probably upside down
+                            RotatePage();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Not enough lines on page {0}", PageNumber);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void RotatePage()
+        {
+            foreach (Word w in words)
+            {
+                Rotate(w);
+            }
+        }
+
+        private void Rotate(Word w)
+        {
+            var oldXMax = w.XMax;
+            w.XMax = Width - w.XMin;
+            w.XMin = Width - oldXMax;
+
+            var oldYMax = w.YMax;
+            w.YMax = Height - w.YMin;
+            w.YMin = Height - oldYMax;
         }
 
         /// <summary>
