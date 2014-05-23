@@ -52,10 +52,11 @@ namespace PdfReflow
                     }
                     w.Text = word.Value;
                     
-                    w.XMin = float.Parse(word.Attribute("xMin").Value);
-                    w.XMax = float.Parse(word.Attribute("xMax").Value);
-                    w.YMin = float.Parse(word.Attribute("yMin").Value);
-                    w.YMax = float.Parse(word.Attribute("yMax").Value);
+                    w.XMin = (float)Math.Round(float.Parse(word.Attribute("xMin").Value),2);
+                    w.XMax = (float)Math.Round(float.Parse(word.Attribute("xMax").Value), 2);
+                    w.YMin = (float)Math.Round(float.Parse(word.Attribute("yMin").Value), 2);
+                    w.YMax = (float)
+                        Math.Round(float.Parse(word.Attribute("yMax").Value), 2);
                     if (w.YMax > pageHeight - ignoreBorder || w.XMax > pageWidth - ignoreBorder || w.YMin < ignoreBorder || w.XMin < ignoreBorder)
                     {
                         //Console.WriteLine("Skip word: {0}", w.Text);

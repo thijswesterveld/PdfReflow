@@ -161,7 +161,7 @@ namespace PdfReflow
                         float xDiff = w.XMin - previousWord.XMax;
                         int dummy; 
                         if (Math.Abs(w.YMin - previousWord.YMin) < w.Height
-                            && (xDiff < 0.02 * w.Height  || (xDiff < 0.1 * w.Height && Math.Round(w.Height,2) == Math.Round(previousWord.Height,2)))
+                            && (xDiff < 0.02 * w.Height  || (xDiff < 0.1 * w.Height && w.Height == previousWord.Height))
                             && xDiff > -0.5 * w.Height
                             && !int.TryParse(previousWord.Text, out dummy)) // do not combine closely-spaced numbered lists
                         {
