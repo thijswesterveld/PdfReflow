@@ -61,7 +61,7 @@ namespace PdfReflow
             /// Compare horizontal space to lineheight (we use lineheight as proxy for fontsize)
             /// Close enough? -> same column -> check same line
             float hSpace = nextWord.XMin - XMax;
-            if (hSpace > 0 && hSpace < 2 * Height)
+            if (hSpace > 0 && hSpace < 0.5 * Height)
             {
                 ///  Rougly same height on page? 
                 float errorMargin = 0.2f * Height;
