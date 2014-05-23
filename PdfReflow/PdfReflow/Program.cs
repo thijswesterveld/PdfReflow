@@ -14,6 +14,7 @@ namespace PdfReflow
             string outputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\txt_mergereorder\";
             foreach (string file in System.IO.Directory.EnumerateFiles(inputDir, "*.html"))
             {
+                Console.WriteLine(file);
                 string baseName = System.IO.Path.GetFileNameWithoutExtension(file);
                 PdfTextDocument doc = new PdfTextDocument();
                 doc.FromXHtml(file);

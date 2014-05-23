@@ -20,10 +20,11 @@ namespace PdfReflow
         /// <summary>
         /// Read HTML file with pages, words and bounding boxes into pdftextdocument format
         /// </summary>
-        /// <param name="filePath">Path to HTML file which is output of `pdftotext -raw -bbox somefile.pdf`</param>
+        /// <param name="filePath">Path to HTML file which is output of `pdftotext -enc Latin1 -raw -bbox somefile.pdf`</param>
         public void FromXHtml(string filePath)
         {
-            var doc = XElement.Load(filePath);
+            TextReader tr = new StreamReader(filePath, Encoding.GetEncoding("ISO-8859-1"));
+            var doc = XElement.Load(tr);
             
             // Create a namespace manager
             XmlNamespaceManager namespaceManager = new XmlNamespaceManager(new NameTable());
