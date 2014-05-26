@@ -388,43 +388,6 @@ namespace PdfReflow
             return candidates;
         }
 
-        /// <summary>
-        /// Find textblocks that can be merged vertically with the following block without intersecting other blocks
-        /// </summary>
-        /// <param name="candidateBlocks">The textBlocks to consider</param>
-        /// <returns>a dictionary of textblocks grouped by vertical space between block 
-        /// and next block at same horizontal position ordered by increasing sapce</returns>
-        private SortedDictionary<float, List<TextBlock>> GetVerticalMergeCandidates(List<TextBlock> candidateBlocks)
-        {
-            // find groups of horizontally aligned blocks
-            var xGroups = candidateBlocks.GroupBy(b => b.XMin);
-
-            // build a dictionary of textblocks grouped by vertical space between block and next block at same xPosition
-            SortedDictionary<float, List<TextBlock>> vMergeCandidates = new SortedDictionary<float, List<TextBlock>>();
-
-            /// compute vertical space between horizontally alligned blocks
-            foreach (var xG in xGroups)
-            {
-                TextBlock previousBlock = null;
-                foreach (TextBlock b in xG.OrderBy(g => g.YMin))
-                {
-                    if (previousBlock != null)
-                    {
-                        float verticalSpace = b.YMin - previousBlock.YMax;
-                        List<TextBlock> verticalSpaceBlocks;
-                        if (!vMergeCandidates.TryGetValue(verticalSpace, out verticalSpaceBlocks))
-                        {
-                            verticalSpaceBlocks = new List<TextBlock>();
-                            vMergeCandidates.Add(verticalSpace, verticalSpaceBlocks);
-                        }
-                        verticalSpaceBlocks.Add(previousBlock);
-                    }
-                    previousBlock = b;
-                }
-            }
-            return vMergeCandidates;
-        }
-
         public override string ToString()
         {
             StringBuilder result = new StringBuilder();

@@ -174,20 +174,12 @@ namespace PdfReflow
                     {
                         newBlock.Type = ElementType.H1;
                     }
-                    else
-                    {
-                        Console.WriteLine("Line on angle: {0}", this);
-                    }
                 }
                 else if (newBlock.AvgLineHeight > 20)
                 {
                     if (newBlock.Children.Count(c => c is Line && ((Line)c).IsOnAngle) == 0)
                     {
                         newBlock.Type = ElementType.H2;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Line on angle: {0}", this);
                     }
                 }
                 previousBlock = newBlock;
