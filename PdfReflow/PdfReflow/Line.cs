@@ -20,6 +20,8 @@ namespace PdfReflow
             Words = new List<Word>();
         }
 
+        public  bool IsOnAngle = false;
+
         public void AddWord(Word w)
         {
             if (Words.Count == 0)
@@ -73,6 +75,7 @@ namespace PdfReflow
                 errorMargin =  Math.Min(Height,nextWord.Height);
                 if (nextWord.YMin > YMin - errorMargin && nextWord.YMax < YMax + errorMargin)
                 {
+                    IsOnAngle = true;
                     return true;
                 }
             }

@@ -1,93 +1,78 @@
-﻿#2 Hoe belangrijk is jouw stad?
+﻿#2 Hoe belangrijk is jouw stad? 
 
-##1b
+##1b 
 
-##1a
+##1a 
 
-##2a
+##2a 
 
-##Op welk station lijkt het
+Op welk station lijkt het station in jouw woonplaats? Heeft jouw plaats geen 
 
-##station in jouw woonplaats?
+station? Dan krijg je 0 punten. 
 
-##Heeft jouw plaats geen
+A 
 
-station? Dan krijg je
+B 
 
-0 punten.
+2 1 
 
-A
+punten 
 
-B
+punt 
 
-2
-1
+##5 
 
-punten
+Uitslag 
 
-punt
+###0-2 punten: Jij woont vast niet in een stad. 
 
-##5
+Wanneer je kleren gaat kopen, moet je naar een stad in de buurt. Die stad is ook een beetje "jouw" stad. 
 
-Uitslag
+###3-7 punten: In jouw woonplaats is van alles te 
 
-###0-2 punten: Jij woont vast niet in een stad.
+doen. Mensen uit de kleine dorpjes in de buurt komen bij jullie winkelen. Maar jij gaat misschien ook wel eens naar een andere stad om te winkelen. 
 
-Wanneer je kleren gaat kopen, moet je naar een
-stad in de buurt. Die stad is ook een beetje
-"jouw" stad.
+###8-13 punten: Jij hoeft je stad niet uit om 
 
-###3-7 punten: In jouw woonplaats is van alles te
+te winkelen. Waarschijnlijk komen mensen uit het hele land naar jouw stad toe. 
 
-doen. Mensen uit de kleine dorpjes in de buurt
-komen bij jullie winkelen. Maar jij gaat misschien
-ook wel eens naar een andere stad om
-te winkelen.
+File bij een parkeergarage: 
 
-###8-13 punten: Jij hoeft je stad niet uit om
+Ja 
 
-te winkelen. Waarschijnlijk komen mensen uit
-het hele land naar jouw stad toe.
+Nee 
 
-##File bij een parkeergarage:
+1 
 
-Ja
+0 
 
-Nee
+punt punten 
 
-1
+20 
 
-0
+##4 
 
-punt
-punten
+punt 
 
-20
+punt 
 
-##4
++ 
 
-punt
++ 
 
-punt
+punt 
 
-+
+punt 
 
-+
++ 
 
-punt
++ 
 
-punt
+punt punt 
 
-+
+1 
 
-+
+1 
 
-punt
-punt
-
-1
-
-1
-
-1
+1 
 

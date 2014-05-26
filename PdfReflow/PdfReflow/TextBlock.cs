@@ -124,7 +124,7 @@ namespace PdfReflow
                     }
                     else
                     {
-                        if ((int)l.Height != (int)previousLine.Height)
+                        if ((int)l.Height != (int)previousLine.Height && !l.IsOnAngle)
                         {
                             // Font size difference This is a block
                             newChildren.Add(block);
@@ -146,7 +146,7 @@ namespace PdfReflow
                     (b as TextBlock).IdentifyHeaders();
                     newChildren.Add(b);
                 }
-            }
+            }   
             if(block != null)
             {
                 newChildren.Add(block);
@@ -170,11 +170,25 @@ namespace PdfReflow
                 }
                 if (newBlock.AvgLineHeight > 50)
                 {
-                    newBlock.Type = ElementType.H1;
+                    if (newBlock.Children.Count(c => c is Line && ((Line)c).IsOnAngle) == 0)
+                    {
+                        newBlock.Type = ElementType.H1;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Line on angle: {0}", this);
+                    }
                 }
                 else if (newBlock.AvgLineHeight > 20)
                 {
-                    newBlock.Type = ElementType.H2;
+                    if (newBlock.Children.Count(c => c is Line && ((Line)c).IsOnAngle) == 0)
+                    {
+                        newBlock.Type = ElementType.H2;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Line on angle: {0}", this);
+                    }
                 }
                 previousBlock = newBlock;
 
