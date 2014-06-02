@@ -23,7 +23,7 @@ namespace PdfReflow
                 string[] fields = line.Split(',');
                 string isbn = fields[0];
                 string title = fields[1];
-                string group = fields[2];
+                string group = fields[2]; 
                 string subject = fields[3];
                 string type =fields[4];
 
