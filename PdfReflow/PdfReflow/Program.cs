@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace PdfReflow
 {
     class Program
-    {
+    { 
         static void Main(string[] args)
         {
             string indexFile = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\Metadata pdfs_TM.csv";
