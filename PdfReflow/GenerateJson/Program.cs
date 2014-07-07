@@ -20,6 +20,12 @@ namespace GenerateJson
         public string portfolio;
     }
 
+    class EightlyLegsResult
+    {
+        public string url;
+        public string result;
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -44,6 +50,8 @@ namespace GenerateJson
                 string baseName = string.Join("_",isbn, subject,  type, "groep"+group);
                 foreach (string directory in System.IO.Directory.EnumerateDirectories(inputDir, isbn + "*"))
                 {
+                    List<EightlyLegsResult> results = new List<EightlyLegsResult>();
+                    
                     Directory.CreateDirectory(Path.Combine(outputDir, baseName));
                     foreach (string file in System.IO.Directory.EnumerateFiles(directory, "*.txt"))
                     {
@@ -51,21 +59,28 @@ namespace GenerateJson
                         if (match != null && match.Groups.Count > 1)
                         {
                             string p = match.Groups[1].Value;
-                            Convert(file, Path.Combine(outputDir, baseName), baseName + "_p" + p + ".json", baseName);
+                            
+                            results.Add(Convert(file, baseName, p));
                         }
                     }
+                    string outputFile = Path.Combine(outputDir, baseName + ".json");
+                    TextWriter tw = new StreamWriter(outputFile);
+                    string json = JsonConvert.SerializeObject(results,Formatting.Indented);
+                    tw.WriteLine(json);
+                    tw.Flush();
+                    tw.Close();
                 }
                 line = tr.ReadLine();
             }
         }
 
-        private static void Convert(string inputFile, string outputDir, string outputFile, string portfolio)
+        private static EightlyLegsResult Convert(string inputFile, string portfolio, string page)
         {
             TextReader tr = new StreamReader(inputFile);
             
             TMdocument doc = new TMdocument();
             doc.portfolio = portfolio;
-            doc.url = outputFile;
+            doc.url = string.Format("{0}_p{1}",portfolio,page);
             List<string> paragraphs = new List<string>();
             StringBuilder paragraph = new StringBuilder();
             
@@ -83,12 +98,14 @@ namespace GenerateJson
                 }
                 line = tr.ReadLine();
             }
-            doc.content = paragraphs.ToArray();
-            string json = JsonConvert.SerializeObject(doc,Formatting.Indented);
-            TextWriter tw = new StreamWriter(Path.Combine(outputDir,outputFile));
-            tw.WriteLine(json);
-            tw.Flush();
-            tw.Close();
+            doc.content = paragraphs.ToArray();            
+            
+            string json = JsonConvert.SerializeObject(doc,Formatting.None).Replace("\"","\"");
+            return new EightlyLegsResult()
+            {
+                url = doc.url,
+                result = json
+            };
 
         }
     }
