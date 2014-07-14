@@ -17,6 +17,8 @@ namespace GenerateJson
 
         public string[] content;
 
+        public string[] images;
+
         public string portfolio;
     }
 
@@ -25,14 +27,17 @@ namespace GenerateJson
         public string url;
         public string result;
     }
-
+    
+    
     class Program
     {
+        private static string imageDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\TMimagesS3\";
+        private static string indexFile = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\Metadata pdfs_TM.csv";
+        private static string inputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\txt_mergereorder\";
+        private static string outputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\json\";
+        
         static void Main(string[] args)
         {
-            string indexFile = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\Metadata pdfs_TM.csv";
-            string inputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\txt_mergereorder\";
-            string outputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\json\";
             
 
             TextReader tr = new StreamReader(indexFile);
@@ -52,15 +57,14 @@ namespace GenerateJson
                 {
                     List<EightlyLegsResult> results = new List<EightlyLegsResult>();
                     
-                    Directory.CreateDirectory(Path.Combine(outputDir, baseName));
                     foreach (string file in System.IO.Directory.EnumerateFiles(directory, "*.txt"))
                     {
                         Match match = Regex.Match(file, @"p(\d+).txt$");
                         if (match != null && match.Groups.Count > 1)
                         {
                             string p = match.Groups[1].Value;
-                            
-                            results.Add(Convert(file, baseName, p));
+
+                            results.Add(Convert(file,baseName,p));
                         }
                     }
                     string outputFile = Path.Combine(outputDir, baseName + ".json");
@@ -72,6 +76,23 @@ namespace GenerateJson
                 }
                 line = tr.ReadLine();
             }
+        }
+
+        private static string[] GetImages(string imageDir,string baseName, string p)
+        {
+            List<string> images = new List<string>();
+            string filePattern = string.Format("*-{1:000}-*.jpg",baseName,p);
+            string baseNameImageDir = Path.Combine(imageDir, baseName);
+            if (Directory.Exists(baseNameImageDir))
+            {
+                foreach (string file in System.IO.Directory.EnumerateFiles(baseNameImageDir, filePattern))
+                {
+                    // include relative URL from imageDir base
+                    images.Add(file.Replace(imageDir,"").Replace("\\","/"));
+                }
+            }
+            return images.ToArray();
+                    
         }
 
         private static EightlyLegsResult Convert(string inputFile, string portfolio, string page)
@@ -98,8 +119,9 @@ namespace GenerateJson
                 }
                 line = tr.ReadLine();
             }
-            doc.content = paragraphs.ToArray();            
-            
+            doc.content = paragraphs.ToArray();
+            doc.images = GetImages(imageDir,portfolio , page);
+                          
             string json = JsonConvert.SerializeObject(doc,Formatting.None).Replace("\"","\"");
             return new EightlyLegsResult()
             {
