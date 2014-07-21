@@ -9,7 +9,7 @@ namespace PdfReflow
     /// <summary>
     ///  Element in a document (e.g. word, line, paragraph, etc) with its position
     /// </summary>
-    public abstract class BoundingBox
+    public  class BoundingBox
     {
         /// <summary>
         /// Horizontal leftmost position of the elements bounding box on the page (in pts from top left corner)
@@ -39,6 +39,15 @@ namespace PdfReflow
         public float Width
         {
             get { return XMax - XMin; }
+        }
+
+        public bool Overlaps(BoundingBox other)
+        {
+            /// For both x and y coördinates, overlapping blocks have either min or max value (or both) in the merged bounding box range
+            return 
+            (((other.XMax >= XMin && other.XMax <= XMax) || (other.XMin >= XMin && other.XMin <= XMax)) && // x overlap
+                ((other.YMax >= YMin && other.YMax <= YMax) || (other.YMin >= YMin && other.YMin <= YMax))    // y overlap
+             );
         }
     }
 }

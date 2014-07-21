@@ -11,7 +11,7 @@ namespace PdfReflow
     { 
         static void Main(string[] args)
         {
-            string indexFile = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\Metadata pdfs_TM.csv";
+            string indexFile = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\MetadataPdfs_TM_VO.csv";
             string inputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\bboxhtml\";
             string outputDir = @"C:\Users\ThijsWizeNoze\Documents\pdfhtmltest\trainingData\";
 
@@ -27,13 +27,13 @@ namespace PdfReflow
                 string subject = fields[3];
                 string type =fields[4];
 
-                foreach (string file in System.IO.Directory.EnumerateFiles(inputDir, isbn + "*.html"))
+                foreach (string file in System.IO.Directory.EnumerateFiles(inputDir, "*"+isbn + "*.html"))
                 {
                     string baseName = isbn + "_" + subject + "_" + type;
                     PdfTextDocument doc = new PdfTextDocument();
                     doc.FromXHtmlFile(file);
                     doc.Reflow();
-                    string path = System.IO.Path.Combine(outputDir, "groep"+group);
+                    string path = System.IO.Path.Combine(outputDir, group);
                     if(!System.IO.Directory.Exists(path))
                     {
                         System.IO.Directory.CreateDirectory(path);
