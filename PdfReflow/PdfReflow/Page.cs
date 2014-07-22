@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BrookNovak.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -212,6 +213,22 @@ namespace PdfReflow
             }
         }
 
+        private List<TextBlock> xOrderedBlocks
+        {
+            get
+            {
+                return new List<TextBlock>(blocks.OrderBy(b => b.XMin).ThenByDescending(b => b.XMax));
+            }
+        }
+
+        private List<TextBlock> yOrderedBlocks
+        {
+            get
+            {
+                return new List<TextBlock>(blocks.OrderBy(b => b.YMin).ThenByDescending(b => b.YMax));
+            }
+        }
+
         private void IdentifyBlocks()
         {
             if (lines != null)
@@ -269,159 +286,19 @@ namespace PdfReflow
 
         }
 
-        private void _MergeBlocks()
-        {
-            Dictionary<TextBlock, KeyValuePair<TextBlock, float>> mergeCandidates = _GetMergeCandidates();
-            while (mergeCandidates.Count() > 0)
-            {
-                var candidate = mergeCandidates.OrderBy(mc => mc.Value.Value).FirstOrDefault();
-
-                TextBlock toMergeA = candidate.Key;
-                TextBlock toMergeB = candidate.Value.Key;
-
-                /// find indexes of blocks to merge
-                /// because of the way mergeCandidates are computed, idxA is always smaller than idxB
-                /// -> first remove block at idxB, then at idxA
-                /// insert new block at idxA
-
-                int idxA = blocks.FindIndex(b => b == toMergeA);
-                int idxB = blocks.FindIndex(b => b == toMergeB);
-                blocks.RemoveAt(idxB);
-                blocks.RemoveAt(idxA);
-                TextBlock mergedBlock = new TextBlock();
-                mergedBlock.AddChildBlock(candidate.Key);
-                mergedBlock.AddChildBlock(candidate.Value.Key);
-                blocks.Insert(idxA, mergedBlock);
-                mergeCandidates = _GetMergeCandidates();
-            }
-        }
-
-
-        private float _Distance(TextBlock blockA, TextBlock blockB)
-        {
-            float hDist = _Dist1D(blockA.XMin, blockB.XMin, blockA.XMax, blockB.XMax);
-            float vDist = _Dist1D(blockA.YMin, blockB.YMin, blockA.YMax, blockB.YMax);
-            // return euclidean distance
-            return (float)Math.Sqrt(Math.Pow(hDist, 2) + Math.Pow(vDist, 2));
-        }
-
-        private float _Dist1D(float aMin, float bMin, float aMax, float bMax)
-        {
-            if (aMin <= bMin)
-            {
-                /// A: |-----
-                /// /// B:    |-----
-                if (bMin >= aMax)
-                {
-                    /// A: |-----|
-                    /// /// B:       |-----|
-                    return bMin - aMax;
-                }
-                else
-                {
-                    /// A: |---------|
-                    /// /// B:    |-----
-                    return 0;
-                }
-            }
-            else
-            {
-                return _Dist1D(bMin, aMin, bMax, aMax);
-            }
-        }
-
-
-        /// <summary>
-        /// Find candidate blocks for merging. For each (top-level) block in the page find other blocks on the page that 
-        /// can be merged without intersecting or including any other blocks
-        /// </summary>
-        /// <returns>A dictionary with per mergable block in the page the blocks that can be merged </returns>
-        private Dictionary<TextBlock, KeyValuePair<TextBlock, float>> _GetMergeCandidates()
-        {
-            List<TextBlock> processedBlocks = new List<TextBlock>();
-            Dictionary<TextBlock, KeyValuePair<TextBlock, float>> mergePairs = new Dictionary<TextBlock, KeyValuePair<TextBlock, float>>();
-            if (blocks != null)
-            {
-                foreach (TextBlock sourceBlock in blocks)
-                {
-                    processedBlocks.Add(sourceBlock);
-                    Dictionary<TextBlock, float> mergeCandidates = _GetMergeCandidates(sourceBlock, blocks.Where(b => !processedBlocks.Contains(b)));
-                    if (mergeCandidates.Count() > 0)
-                    {
-                        // add closest candidate as mergePair
-                        mergePairs.Add(sourceBlock, mergeCandidates.OrderBy(m => m.Value).First());
-                    }
-                }
-            }
-            return mergePairs;
-        }
-
-        /// <summary>
-        /// Get blocks that can be merged with the specified sourceBlock
-        /// </summary>
-        /// <param name="sourceBlock">the source block for the merge</param>
-        /// <param name="blocksToProcess">select mergable blocks from these candidates</param>
-        /// <returns>Candidates that can be safely merged without intersecting other blocks on the page</returns>
-        private Dictionary<TextBlock, float> _GetMergeCandidates(TextBlock sourceBlock, IEnumerable<TextBlock> blocksToProcess)
-        {
-            Dictionary<TextBlock, float> candidates = new Dictionary<TextBlock, float>();
-            foreach (TextBlock candidate in blocksToProcess)
-            {
-                // compute merged bounding box
-                float xMin = Math.Min(candidate.XMin, sourceBlock.XMin);
-                float xMax = Math.Max(candidate.XMax, sourceBlock.XMax);
-                float yMin = Math.Min(candidate.YMin, sourceBlock.YMin);
-                float yMax = Math.Max(candidate.YMax, sourceBlock.YMax);
-
-                /// find blocks on page that overlap with merged bounding box 
-                /// For both x and y coördinates, overlapping blocks have either min or max value (or both) in the merged bounding box range
-                var horizontalOverlap = blocks.FindAll(b => (b.XMax >= xMin && b.XMax <= xMax) || (b.XMin >= xMin && b.XMin <= xMax));
-                var verticalOverlap = blocks.FindAll(b => (b.YMax >= yMin && b.YMax <= yMax) || (b.YMin >= yMin && b.YMin <= yMax));
-                var overlapping = horizontalOverlap.Intersect(verticalOverlap);
-
-                // If source and candidate are the only blocks in the merged bounding box, the candidate should be kept
-                if (overlapping.Count() == 2)
-                {
-                    candidates.Add(candidate, _Distance(sourceBlock, candidate));
-                }
-            }
-            return candidates;
-        }
-
-
-
-
+               
         private void MergeBlocks()
         {
             HashSet<BlockMergeInfo> mergeInfo = new HashSet<BlockMergeInfo>(ClosestMergablePairs());
-
-            //Dictionary<TextBlock, KeyValuePair<TextBlock, float>> mergeCandidates = _GetMergeCandidates();
             
-            while(mergeInfo.Where(m => m.CanMerge).Count() > 0)
+            while(mergeInfo.Count() > 0)
             {
-                var mergePair = mergeInfo.Where(m => m.CanMerge).OrderBy(m => m.Distance).ThenBy(m => m.BlockIdx).FirstOrDefault();
+                var mergePair = mergeInfo.OrderBy(m => m.Distance).ThenBy(m => m.SourceIdx).ThenBy(m => m.TargetIdx).FirstOrDefault();
                 
-                /// find indexes of blocks to merge
-                
+                /// find indexes of blocks to merge                
                 int idxSource = blocks.FindIndex(b => b == mergePair.Source);
                 int idxTarget = blocks.FindIndex(b => b == mergePair.Target);
-
-                //// START Compare with previous method
-                //var _candidate = mergeCandidates.OrderBy(mc => mc.Value.Value).FirstOrDefault();
-
-                //TextBlock _toMergeA = _candidate.Key;
-                //TextBlock _toMergeB = _candidate.Value.Key;
-                //int _idxSource = blocks.FindIndex(b => b == _toMergeA);
-                //int _idxTarget = blocks.FindIndex(b => b == _toMergeB);
-
-                //bool sameBlocks = ((_idxSource == idxSource && _idxTarget == idxTarget) || (_idxSource == idxTarget && _idxTarget == idxSource));
-                //if (!sameBlocks)
-                //{
-                //    var altPair = mergeInfo.Where(m => (m.Source == _toMergeA && m.Target == _toMergeB) || (m.Source == _toMergeB && m.Target == _toMergeA));
-                //    var _altCandidate = mergeCandidates.Where(m => (m.Key == mergePair.Source && m.Value.Key == mergePair.Target) || (m.Key == mergePair.Target && m.Value.Key == mergePair.Source));
-                //}
-                //// END Compare with previous method
-                
+          
                 /// make sure idx of source is smaller than idx of target
                 /// -> first remove block at idxTarget, then at idxSource
                 /// insert new block at idxSource
@@ -434,45 +311,12 @@ namespace PdfReflow
                 blocks.RemoveAt(idxTarget);
                 blocks.RemoveAt(idxSource);
                 blocks.Insert(idxSource, mergePair.MergedBlock);
-
+                
                 mergeInfo = new HashSet<BlockMergeInfo>(ClosestMergablePairs());
-                //UpdateBlockPairs(mergePair, idxTarget, ref mergeInfo);
-              //  mergeCandidates = _GetMergeCandidates();
             }
         }
 
-        private void UpdateBlockPairs(BlockMergeInfo mergedPair, int removedIdx, ref HashSet<BlockMergeInfo> mergeInfo)
-        {
-            // First remove pairs that contain one of the merged blocks            
-            mergeInfo.RemoveWhere(m => m.Source == mergedPair.Source || m.Target == mergedPair.Source || m.Source == mergedPair.Target || m.Target == mergedPair.Target);
-
-            /// Then replace the invidual blocks in the overlapping lists with the merged block 
-            /// if at least one of the individual blocks was overlapping with a merge-pair, then the new merged block must overlap as well
-            foreach (var mergeCandidate in mergeInfo)
-            {
-                if (mergeCandidate.BlockIdx > removedIdx)
-                {
-                    mergeCandidate.BlockIdx--;
-                }
-                int removeCount = mergeCandidate.Overlapping.RemoveWhere(t => t == mergedPair.Target || t == mergedPair.Source);
-                if (removeCount > 0 || mergeCandidate.mergedBlock.Overlaps(mergedPair.mergedBlock))
-                {
-                    mergeCandidate.Overlapping.Add(mergedPair.mergedBlock);
-                }
-            }
-
-            // Finally find new candidates to merge with the newly merged block
-            for (int i = 0; i < blocks.Count(); ++i)
-            {
-                if (i != mergedPair.BlockIdx)
-                {
-                    BlockMergeInfo bmi = new BlockMergeInfo(Math.Min(i, mergedPair.BlockIdx), mergedPair.MergedBlock, blocks[i]);
-                    bmi.Overlapping = new HashSet<TextBlock>(GetOverlapping(bmi.Source, bmi.Target));
-                }
-            }
-        }
-
-      
+       
         /// <summary>
         /// Get candidates for merging with a source block 
         /// </summary>
@@ -481,48 +325,45 @@ namespace PdfReflow
         /// <returns>Candidates with for each candidate a set of blocks that overlap with the resulting blogk</returns>
         private IEnumerable<BlockMergeInfo> ClosestMergablePairs()
         {
-            float minMergableDistance = float.MaxValue;
-            for (int i = 0; i < blocks.Count(); ++i)
+            if (blocks != null)
             {
-                for (int j = i + 1; j < blocks.Count(); ++j)
+                float minMergableDistance = float.MaxValue;
+                for (int i = 0; i < blocks.Count(); ++i)
                 {
-                    BlockMergeInfo bmi = new BlockMergeInfo(i, blocks[i], blocks[j]);
-                    if(bmi.Distance <= minMergableDistance)
+                    for (int j = i + 1; j < blocks.Count(); ++j)
                     {
+                        BlockMergeInfo bmi = new BlockMergeInfo(i, j, blocks[i], blocks[j]);
                         // computing overlap is expensive
                         // only check for overlapping blocks if candidate blocks are close enough
-                        bmi.Overlapping = new HashSet<TextBlock>(GetOverlapping(bmi.Source, bmi.Target));
-                        if (bmi.CanMerge)
+                        if (bmi.Distance <= minMergableDistance)
                         {
-                            minMergableDistance = bmi.Distance;
+
+                            if (CanMerge(blocks[i], blocks[j]))
+                            {
+                                minMergableDistance = bmi.Distance;
+                                yield return bmi;
+                            }
                         }
-                        yield return bmi;
                     }
-                    
                 }
             }
         }
 
-        private IEnumerable<BlockMergeInfo> AllPairs()
-        {
-            for (int i = 0; i < blocks.Count(); ++i)
-            {
-                for (int j = i + 1; j < blocks.Count(); ++j)
-                {
-                    BlockMergeInfo bmi = new BlockMergeInfo(i, blocks[i], blocks[j]);
-                    bmi.Overlapping = new HashSet<TextBlock>(GetOverlapping(bmi.Source, bmi.Target));
-                    yield return bmi;
-                }
-            }
-        }
-
-        private IEnumerable<TextBlock> GetOverlapping(TextBlock blockA, TextBlock blockB)
+        /// <summary>
+        /// Check if the blocks can be merged, i.e., if no other blocks overlap with the resulting mergedblock
+        /// </summary>
+        /// <param name="blockA"></param>
+        /// <param name="blockB"></param>
+        /// <returns></returns>
+        private bool CanMerge(TextBlock blockA, TextBlock blockB)
         {
             BoundingBox merged = MergedBoundingBox(blockA, blockB);
             // compute merged bounding box
+            //var xOverlap =  blockXTree.FindOverlapping(merged);
+            //var yOverlap= blockYTree.FindOverlapping(merged);
+            //var overlapAlt = xOverlap.Intersect(yOverlap);
 
-            var overlap = blocks.FindAll(b => b.Overlaps(merged));    
-            return overlap;
+            return !blocks.Exists(b => b!= blockA && b!=blockB && b.Overlaps(merged));        
         }
 
         private BoundingBox MergedBoundingBox(TextBlock blockA, TextBlock blockB)

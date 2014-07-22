@@ -43,11 +43,9 @@ namespace PdfReflow
 
         public bool Overlaps(BoundingBox other)
         {
-            /// For both x and y coördinates, overlapping blocks have either min or max value (or both) in the merged bounding box range
             return 
-            (((other.XMax >= XMin && other.XMax <= XMax) || (other.XMin >= XMin && other.XMin <= XMax)) && // x overlap
-                ((other.YMax >= YMin && other.YMax <= YMax) || (other.YMin >= YMin && other.YMin <= YMax))    // y overlap
-             );
+                   this.XMin <= other.XMax   && this.XMax >= other.XMin &&
+                   this.YMin <=other.YMax && this.YMax >= other.YMin;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BrookNovak.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,30 +9,32 @@ namespace PdfReflow
 {
     public class BlockMergeInfo
     {
-        public BlockMergeInfo(int minIdx, TextBlock source, TextBlock target)
+        public BlockMergeInfo(int sourceIdx, int targetIdx, TextBlock source, TextBlock target)
         {
-                BlockIdx = minIdx;
+            if (sourceIdx < targetIdx)
+            {
+                SourceIdx = sourceIdx;
+                TargetIdx = targetIdx;
                 Source = source;
                 Target = target;
+            }
+            else
+            {
+                // Swap source and target to maintain document order
+                SourceIdx = targetIdx;
+                TargetIdx = sourceIdx;
+                Source = target;
+                Target = source;
+            }
         }
 
-        public int BlockIdx;
+        public int SourceIdx;
+
+        public int TargetIdx;
 
         public TextBlock Source;
 
         public TextBlock Target;
-
-        public HashSet<TextBlock> Overlapping;
-
-        public bool CanMerge
-        {
-            get 
-            {
-                /// we can only merge if the resulting merge block does not overlap with any other blocks,
-                /// i.e., if source and target are the only two blocks in the overlapping set
-                return Overlapping.Count() ==2;
-            }
-        }
 
         public float Distance
         {
@@ -44,7 +47,7 @@ namespace PdfReflow
             }
         }
 
-        public TextBlock mergedBlock = null;
+        private TextBlock mergedBlock = null;
         public TextBlock MergedBlock
         {
             get

@@ -87,9 +87,15 @@ namespace PdfReflow
 
         public void Reflow()
         {
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             foreach(Page p in Pages)
             {
-                    p.Reflow();
+                
+                Console.Write("Reflowing  page {0}",p.PageNumber);
+                sw.Restart(); 
+                p.Reflow();
+                sw.Stop();
+                Console.WriteLine(" took {0} ms", sw.ElapsedMilliseconds);
             }
         }
 
